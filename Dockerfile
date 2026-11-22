@@ -6,7 +6,9 @@ FROM python:3.13-slim AS builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 ENV UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never
+    UV_PYTHON_DOWNLOADS=never \
+    UV_HTTP_TIMEOUT=600 \
+    UV_HTTP_RETRIES=10
 
 WORKDIR /app
 
@@ -41,4 +43,4 @@ ENV PATH="/app/.venv/bin:${PATH}" \
 
 EXPOSE 8103
 
-CMD ["fastapi", "run", "server.py", "--host", "0.0.0.0", "--port", "8103"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8103"]

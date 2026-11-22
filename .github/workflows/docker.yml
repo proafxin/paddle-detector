@@ -4,8 +4,16 @@ on:
   push:
     branches: [develop]
     tags: ["v*"]
+    paths: &image-inputs
+      - Dockerfile
+      - .dockerignore
+      - pyproject.toml
+      - uv.lock
+      - server.py
+      - .github/workflows/docker.yml
   pull_request:
     branches: [develop]
+    paths: *image-inputs
   workflow_dispatch:
 
 concurrency:
@@ -56,5 +64,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          # mode=max also caches the builder stage, so Paddle isn't re-downloaded on every run.
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}:buildcache
+          cache-to: ${{ github.event_name != 'pull_request' && format('type=registry,ref=ghcr.io/{0}:buildcache,mode=max', github.repository) || '' }}

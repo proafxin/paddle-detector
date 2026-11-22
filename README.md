@@ -5,8 +5,8 @@ A FastAPI service that runs the PaddleOCR layout detector (`PP-DocLayoutV3`) on 
 ## Run
 
 ```bash
-uv sync --frozen
-PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True uv run fastapi run server.py --port 8103
+uv sync --all-groups --all-packages --all-extras
+PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True uv run uvicorn server:app --port 8103
 ```
 
 The first start downloads the model weights to `~/.paddlex`. The service needs an NVIDIA GPU with CUDA 13 support (`paddlepaddle-gpu` comes from the cu130 index).
