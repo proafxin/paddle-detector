@@ -6,7 +6,7 @@ from functools import lru_cache
 
 import cv2
 import numpy as np
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from paddleocr import LayoutDetection
 from pydantic import BaseModel
 
@@ -137,4 +137,9 @@ async def health() -> dict[str, str]:
 @app.post("/detect")
 async def detect(request: Request) -> list[DetBlock]:
     image = await request.body()
-    return await asyncio.get_running_loop().run_in_executor(get_detect_thread(), detect_layout, image)
+    if not image:
+        raise HTTPException(status_code=400, detail="empty request body; send the page image bytes")
+    try:
+        return await asyncio.get_running_loop().run_in_executor(get_detect_thread(), detect_layout, image)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
