@@ -6,8 +6,10 @@ A FastAPI service that runs the PaddleOCR layout detector (`PP-DocLayoutV3`) on 
 
 ```bash
 uv sync --all-groups --all-packages --all-extras
-PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True uv run uvicorn server:app --port 8103
+PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True uv run --env-file .env uvicorn server:app --port 8103
 ```
+
+`.env` holds local settings and is not committed. Set `CUDA_VISIBLE_DEVICES` there to pin the detector to one GPU, by the UUID `nvidia-smi -L` gives (index order differs between `nvidia-smi` and CUDA); without it the detector runs on CUDA device 0.
 
 The first start downloads the model weights to `~/.paddlex`. The service needs an NVIDIA GPU with CUDA 13 support (`paddlepaddle-gpu` comes from the cu130 index).
 
@@ -15,7 +17,7 @@ With Docker:
 
 ```bash
 docker build -t paddle-detector .
-docker run --gpus all -p 8103:8103 -v paddlex-models:/root/.paddlex paddle-detector
+docker run --gpus all --env-file .env -p 8103:8103 -v paddlex-models:/root/.paddlex paddle-detector
 ```
 
 ## API

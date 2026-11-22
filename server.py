@@ -11,7 +11,6 @@ from paddleocr import LayoutDetection
 from pydantic import BaseModel
 
 DETECT_MODEL = "PP-DocLayoutV3"
-DETECT_WORKERS = 1
 
 DETECT_THRESHOLD = {
     0: 0.5,
@@ -93,7 +92,9 @@ def get_detector() -> LayoutDetection:
 
 @lru_cache
 def get_detect_thread() -> ThreadPoolExecutor:
-    return ThreadPoolExecutor(max_workers=DETECT_WORKERS)
+    # One thread: keeps predict() off the event loop and serializes calls into the
+    # predictor, which is not thread-safe. Scale with more processes (--workers) instead.
+    return ThreadPoolExecutor(max_workers=1)
 
 
 def detect_layout(image: bytes) -> list[DetBlock]:
